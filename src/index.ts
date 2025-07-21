@@ -23,6 +23,8 @@ app.use(
             'http://localhost:3000',
             'http://localhost:5000',
             'https://4cfw3zvk-8888.inc1.devtunnels.ms',
+            'https://tvpdpx33-8888.inc1.devtunnels.ms',
+            'https://tvpdpx33-5000.inc1.devtunnels.ms'
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
         allowedHeaders: [
