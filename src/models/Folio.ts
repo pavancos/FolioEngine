@@ -1,8 +1,10 @@
 import { Schema, model, Types } from "mongoose";
 
 const creatorType = {
-    developedBy: [{ type: String }],
-    createdBy: [{ type: String }],
+    developedBy: [{ 
+        name: { type: String, required: true },
+        githubUsername: { type: String, required: true },
+    }]
 }
 
 const FolioSchema = new Schema({
@@ -10,6 +12,7 @@ const FolioSchema = new Schema({
     folioAvatar: { type: String, required: true },
     creator: { type: creatorType, required: true },
     previewLink: { type: String, required: true },
+    previewImageLink: { type: String, required: true },
     likedBy: [{ type: String }],
 })
 

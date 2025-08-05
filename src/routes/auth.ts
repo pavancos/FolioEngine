@@ -163,9 +163,6 @@ auth.post("/verify", async (req, res) => {
         res.json({ success: false });
       }
     }
-    // console.log('userData: ', userData);
-
-    // name, avatar_url
   } else {
     res.json({ success: false });
   }

@@ -32,7 +32,7 @@ const UserSchema = new Schema({
       repoLink: String,
       liveLink: String,
     }],
-    workexperience: [{
+    workExperience: [{
       role: String,
       company: String,
       techStack: [String],

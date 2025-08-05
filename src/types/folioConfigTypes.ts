@@ -31,6 +31,7 @@ export type WorkExperience = {
 export type Meta = {
   folioName: string;
   folioAvatar: string;
+  folioId: string;
   craftId: string;
   craftName: string;
   repoLink?: string;

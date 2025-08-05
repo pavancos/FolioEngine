@@ -33,6 +33,7 @@ app.use(
             'https://tvpdpx33-5000.inc1.devtunnels.ms',
             'https://dth5w8dq-3000.inc1.devtunnels.ms',
             'https://mdd7t8bl-8888.inc1.devtunnels.ms',
+            'https://dth5w8dq-8888.inc1.devtunnels.ms'
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
         allowedHeaders: [
@@ -59,6 +60,12 @@ app.get('/hello', (req, res) => {
 
 import auth from './routes/auth.js';
 app.use('/auth', auth);
+
+import craftBench from './routes/craftBench.js';
+app.use('/craftBench', craftBench);
+
+import folio from './routes/folio.js';
+app.use('/folio', folio);
 
 import dbTest from './tests/dbTest.js'
 app.use('/dbTest', dbTest);

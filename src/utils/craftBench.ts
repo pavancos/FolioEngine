@@ -1,6 +1,6 @@
 import { Meta } from "../types/folioConfigTypes.js";
 
-export function getMetaDataFromUsers(craftBenches: any[]): Meta[] {
+export function getMetaDataFromUsers(craftBenches: any[]): any[] {
   return craftBenches.map(bench => ({
     craftName: bench.craftName,
     createdAt: bench.createdAt,
