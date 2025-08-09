@@ -51,7 +51,12 @@ auth.post("/github", async (req, res) => {
     if (userData.message === "Bad credentials") {
       res.json({ success: false });
     } else {
-      const findUser = await User.findOne({ username: userData.login });
+      const findUser = await User.findOne({ username: userData.login }).populate({
+          path: "craftBenches",
+          populate: {
+            path: "folioSelected",
+          },
+        });
       let dbData: any = {};
       if (findUser) {
         const upd = await User.findOneAndUpdate(
@@ -65,12 +70,7 @@ auth.post("/github", async (req, res) => {
           {
             new: true
           }
-        ).populate({
-          path: "craftBenches",
-          populate: {
-            path: "folioSelected",
-          },
-        });
+        );
         dbData = await findUser;
       } else {
         const user = await User.create({
@@ -88,6 +88,7 @@ auth.post("/github", async (req, res) => {
         craftBenches: [] as Meta[],
       };
       if (dbData.craftBenches && dbData.craftBenches.length > 0) {
+        console.log('dbData.craftBenches: ', dbData.craftBenches);
         newDbData.craftBenches = getMetaDataFromUsers(dbData.craftBenches);
       }
 
@@ -118,7 +119,12 @@ auth.post("/verify", async (req, res) => {
     if (userData.message === "Bad credentials") {
       res.json({ success: false });
     } else {
-      const findUser = await User.findOne({ username: userData.login });
+      const findUser = await User.findOne({ username: userData.login }).populate({
+          path: "craftBenches",
+          populate: {
+            path: "folioSelected",
+          },
+        });
       if (findUser) {
         console.log("User already exists");
         const upd = await User.findOneAndUpdate(
@@ -132,12 +138,8 @@ auth.post("/verify", async (req, res) => {
           {
             new: true
           }
-        ).populate({
-          path: "craftBenches",
-          populate: {
-            path: "folioSelected",
-          },
-        });
+        );
+        console.log('findUser: ', findUser.craftBenches);
 
         let isRecentConfig: boolean = false;
         if (findUser.recentConfig) {
