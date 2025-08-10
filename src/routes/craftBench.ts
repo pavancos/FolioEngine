@@ -3,6 +3,8 @@ import authCheck from "../middlewares/authCheck.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import CraftBench from "../models/CraftBench.js";
 import User from "../models/User.js";
+import { templates } from "../folios/index.js";
+
 const craftBench = Router();
 craftBench.use(json());
 craftBench.use(asyncHandler(authCheck));
@@ -64,5 +66,46 @@ craftBench.post(
     }
   })
 );
+
+
+craftBench.get('/download/:craftId',asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const craftId = req.params.craftId as string;
+    // console.log('craftId: ', craftId);
+    
+    if (!craftId) {
+      return res.status(400).json({ error: true, message: "Invalid craftId" });
+    }
+
+    const cb  = await CraftBench.findOne(
+      { _id: craftId }
+    ).populate(
+      {
+        path: "folioSelected",
+        select: "folioName",
+        model: "Folio"
+      }
+    );
+    // console.log('cb: ', cb);
+    
+    if (!cb) {
+      return res.status(404).json({ error: true, message: "CraftBench not found" });
+    }
+    const folio = cb.folioSelected as { folioName?: string };
+
+    if (!folio || !folio.folioName) {
+      return res.status(404).json({ error: true, message: "Folio not found" });
+    }
+    const template = templates[folio.folioName];
+    const generatedHTML = template ? template(cb.currentConfig) : "";
+    return res.status(200).send(generatedHTML);
+  } catch (err: any) {
+    res.status(500).json({
+      error: true,
+      message: "Server Error",
+      errorMessage: err && err.message ? err.message : String(err),
+    });
+  }
+}));
 
 export default craftBench;

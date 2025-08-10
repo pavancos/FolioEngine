@@ -81,6 +81,7 @@ auth.post("/github", async (req, res) => {
         dbData = await user;
       }
       let isRecentConfig: Boolean = verifyConfig(dbData.recentConfig);
+      // console.log('isRecentConfig: ', isRecentConfig);
       let newDbData = {
         username: dbData.username,
         avatar: dbData.avatar,
@@ -139,12 +140,12 @@ auth.post("/verify", async (req, res) => {
             new: true
           }
         );
-        console.log('findUser: ', findUser.craftBenches);
-
         let isRecentConfig: boolean = false;
+        // console.log('findUser.recentConfig: ', findUser.recentConfig);
         if (findUser.recentConfig) {
           isRecentConfig = verifyConfig(findUser.recentConfig as any);
         }
+        console.log('isRecentConfig: ', isRecentConfig);
         let newDbData = {
           username: findUser.username,
           avatar: findUser.avatar,

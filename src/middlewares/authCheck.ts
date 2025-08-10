@@ -6,7 +6,8 @@ const authCheck = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const accessToken = req.headers["token"] as string;
+  const accessToken = req.headers["token"] as any;
+  console.log('accessToken: ', accessToken);
   if (!accessToken) {
     res.status(401).json({ success: false, message: "No token provided" });
     return;
