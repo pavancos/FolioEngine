@@ -1,6 +1,4 @@
 export function classic(data:any) {
-    // Removed escaping helper per request; only ensure attributes are quoted.
-    console.log('data.personalInformation: ', data.personalInformation);
     // Notch
 
     let Notch = `

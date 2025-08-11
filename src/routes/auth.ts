@@ -17,8 +17,6 @@ auth.get("/hello", (req, res) => {
 // GitHub Access Token
 auth.post("/github", async (req, res) => {
   const { codeParams } = req.body;
-  console.log(codeParams);
-
   // Exchange code for access token
   const tokenResponse = await fetch(
     "https://github.com/login/oauth/access_token",
@@ -37,7 +35,6 @@ auth.post("/github", async (req, res) => {
   );
 
   const tokenData = await tokenResponse.json();
-  console.log("tokenData: ", tokenData);
   const accessToken = tokenData.access_token;
 
   if (accessToken) {
@@ -89,7 +86,6 @@ auth.post("/github", async (req, res) => {
         craftBenches: [] as Meta[],
       };
       if (dbData.craftBenches && dbData.craftBenches.length > 0) {
-        console.log('dbData.craftBenches: ', dbData.craftBenches);
         newDbData.craftBenches = getMetaDataFromUsers(dbData.craftBenches);
       }
 
@@ -127,7 +123,6 @@ auth.post("/verify", async (req, res) => {
           },
         });
       if (findUser) {
-        console.log("User already exists");
         const upd = await User.findOneAndUpdate(
           {
             username: userData.login,
@@ -145,7 +140,6 @@ auth.post("/verify", async (req, res) => {
         if (findUser.recentConfig) {
           isRecentConfig = verifyConfig(findUser.recentConfig as any);
         }
-        console.log('isRecentConfig: ', isRecentConfig);
         let newDbData = {
           username: findUser.username,
           avatar: findUser.avatar,
