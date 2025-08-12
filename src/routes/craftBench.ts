@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import CraftBench from "../models/CraftBench.js";
 import User from "../models/User.js";
 import { Octokit } from "octokit";
-import {
+import { 
   commitFolioToGithub,
   createGithubRepo,
   publishFolioToGithub,
@@ -14,6 +14,52 @@ import { generateHTMLContent } from "../utils/craftBench.js";
 const craftBench = Router();
 craftBench.use(json());
 craftBench.use(asyncHandler(authCheck));
+
+craftBench.get(
+  "/myspace",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.dbData._id;
+      if (!userId) {
+        return res.status(401).json({ error: true, message: "Unauthorized" });
+      }
+
+      const user = await User.findById(userId).populate({
+        path: "craftBenches",
+        populate: {
+          path: "folioSelected",
+          model:"Folio",
+          select: "folioName folioAvatar",
+        },
+      });
+      if (!user) {
+        return res.status(404).json({ error: true, message: "User not found" });
+      }
+
+      const craftBenches = user.craftBenches.map((bench: any) => ({
+        name: bench.craftName,
+        repoLink: bench.repoLink,
+        status: bench.status,
+        folioSelectedName: bench.folioSelected?.folioName,
+        folioSelectedAvatar: bench.folioSelected?.folioAvatar,
+        craftId: bench._id,
+      }));
+
+      res.status(200).json({
+        error: false,
+        message: "User's craft benches retrieved successfully",
+        craftBenches: craftBenches,
+      });
+    } catch (err: any) {
+      console.log("Error retrieving user's craft benches", err);
+      res.status(500).json({
+        error: true,
+        message: "Server Error",
+        errorMessage: err && err.message ? err.message : String(err),
+      });
+    }
+  })
+);
 
 craftBench.post(
   "/new",

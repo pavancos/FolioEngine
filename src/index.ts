@@ -33,7 +33,8 @@ app.use(
             'https://tvpdpx33-5000.inc1.devtunnels.ms',
             'https://dth5w8dq-3000.inc1.devtunnels.ms',
             'https://mdd7t8bl-8888.inc1.devtunnels.ms',
-            'https://dth5w8dq-8888.inc1.devtunnels.ms'
+            'https://dth5w8dq-8888.inc1.devtunnels.ms',
+            'https://xenfolio.vercel.app'
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
         allowedHeaders: [
@@ -45,7 +46,9 @@ app.use(
             'x-client-token',
             'x-client-secret',
             'Authorization',
-            'token'
+            'token',
+            'Access-Control-Allow-Origin',
+            '*'
         ],
         credentials: true,
     })
