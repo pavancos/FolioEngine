@@ -96,3 +96,43 @@ export const publishFolioToGithub = async (
 
   return enablePagesResponse.data.html_url;
 };
+
+
+// Function to check if a GitHub repository exists
+export const checkGithubRepoExists = async (octokit: Octokit, repoName: string, userName:string) => {
+  try {
+
+    const response = await octokit.request("GET /repos/{owner}/{repo}", {
+      owner: userName,
+      repo: repoName,
+      headers: { 
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    return response.status === 200;
+  } catch (err:any) {
+    if (err.status === 404) {
+      return false;
+    }
+    console.error(`Failed to check repository ${repoName}:`, err);
+    throw err;
+  }
+};
+
+// Function to delete a GitHub repository
+export const deleteGithubRepo = async (octokit: Octokit, repoName: string, userName: string) => {
+  try { 
+    const response = await octokit.request("DELETE /repos/{owner}/{repo}", {
+      owner: userName,
+      repo: repoName,
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    console.log('response: ', response);
+    return response.status === 204;
+  } catch (err:any) {
+    console.error(`Failed to delete repository ${repoName}:`, err);
+    throw err;
+  }
+};

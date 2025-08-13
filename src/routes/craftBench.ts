@@ -4,9 +4,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import CraftBench from "../models/CraftBench.js";
 import User from "../models/User.js";
 import { Octokit } from "octokit";
-import { 
+import {
+  checkGithubRepoExists,
   commitFolioToGithub,
   createGithubRepo,
+  deleteGithubRepo,
   publishFolioToGithub,
 } from "../utils/github.js";
 import { generateHTMLContent } from "../utils/craftBench.js";
@@ -21,19 +23,21 @@ craftBench.get(
     try {
       const userId = req.user?.dbData._id;
       if (!userId) {
-        return res.status(401).json({ error: true, message: "Unauthorized" });
+        res.status(401).json({ error: true, message: "Unauthorized" });
+        return;
       }
 
       const user = await User.findById(userId).populate({
         path: "craftBenches",
         populate: {
           path: "folioSelected",
-          model:"Folio",
+          model: "Folio",
           select: "folioName folioAvatar",
         },
       });
       if (!user) {
-        return res.status(404).json({ error: true, message: "User not found" });
+        res.status(404).json({ error: true, message: "User not found" });
+        return;
       }
 
       const craftBenches = user.craftBenches.map((bench: any) => ({
@@ -73,9 +77,8 @@ craftBench.post(
       }
       if (!folioConfig || !meta) {
         console.log("FolioConfig in Meta not found");
-        return res
-          .status(400)
-          .json({ error: true, message: "Invalid request body" });
+        res.status(400).json({ error: true, message: "Invalid request body" });
+        return;
       }
       const newCraftBench = await CraftBench.create({
         craftName: meta.craftName,
@@ -86,9 +89,10 @@ craftBench.post(
       });
 
       if (!newCraftBench) {
-        return res
+        res
           .status(500)
           .json({ error: true, message: "Failed to create CraftBench" });
+        return;
       }
 
       const updatedUser = await User.findByIdAndUpdate(
@@ -105,15 +109,15 @@ craftBench.post(
       );
 
       if (!updatedUser) {
-        return res
-          .status(500)
-          .json({ error: true, message: "Failed to update user" });
+        res.status(500).json({ error: true, message: "Failed to update user" });
+        return;
       }
-      return res.status(201).json({
+      res.status(201).json({
         error: false,
         message: "CraftBench created successfully",
         craftId: newCraftBench._id.toString(),
       });
+      return;
     } catch (err: any) {
       res.status(500).json({
         error: true,
@@ -130,18 +134,18 @@ craftBench.get(
     try {
       const craftId = req.params.craftId as string;
       if (!craftId) {
-        return res
-          .status(400)
-          .json({ error: true, message: "Invalid craftId" });
+        res.status(400).json({ error: true, message: "Invalid craftId" });
+        return;
       }
 
       const { html, craftName } = await generateHTMLContent(craftId);
       if (!html) {
-        return res
+        res
           .status(404)
           .json({ error: true, message: "Failed to generate HTML" });
+        return;
       }
-      return res.status(200).send(html);
+      res.status(200).send(html);
     } catch (err: any) {
       res.status(500).json({
         error: true,
@@ -157,16 +161,18 @@ craftBench.post(
   asyncHandler(async (req: Request, res: Response) => {
     try {
       if (req.user === undefined || !req.user.accessToken) {
-        return res.status(401).json({ error: true, message: "Unauthorized" });
+        res.status(401).json({ error: true, message: "Unauthorized" });
+        return;
       }
       const accessToken = req.user.accessToken;
       const craftId = req.params.craftId as string;
 
       const { html, craftName } = await generateHTMLContent(craftId);
       if (!html) {
-        return res
+        res
           .status(404)
           .json({ error: true, message: "Failed to generate HTML" });
+        return;
       }
 
       const repoName = `${craftName}`;
@@ -207,12 +213,181 @@ craftBench.post(
       );
 
       if (error.response) {
-        return res.status(error.response.status).json({
+        res.status(error.response.status).json({
           error: error.response.data.message || "Error from GitHub API",
         });
+        return;
+      }
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  })
+);
+
+craftBench.delete(
+  "/delete",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { craftId } = req.body;
+
+      if (!craftId || typeof craftId !== "string") {
+        throw new Error("Invalid or No craftId provided");
+      }
+      if (!req.user || !req.user.accessToken) {
+        res.status(401).json({ error: true, message: "Unauthorized" });
+        return;
       }
 
-      return res.status(500).json({ error: "Internal Server Error" });
+      const userName = req.user.userData.login;
+
+      const accessToken = req.user.accessToken;
+
+      const octokit = new Octokit({
+        auth: accessToken,
+      });
+
+      const craftData = await CraftBench.findOne({
+        _id: craftId,
+        userCreated: req.user?.dbData._id,
+      });
+
+      if (!craftData || !craftData.craftName) {
+        res.status(404).json({
+          error: true,
+          message:
+            "CraftBench not found or you do not have permission to delete it",
+        });
+        return;
+      }
+
+      const isPublished = craftData.status === "published";
+
+      if (isPublished) {
+        const doesRepoExists = await checkGithubRepoExists(
+          octokit,
+          craftData.craftName,
+          userName
+        );
+        if (!doesRepoExists) {
+          res.status(500).json({
+            error: true,
+            message: "GitHub repository does not exist",
+          });
+        } else {
+          const isRepoDeleted = await deleteGithubRepo(
+            octokit,
+            craftData.craftName,
+            userName
+          );
+          if (!isRepoDeleted) {
+            res.status(500).json({
+              error: true,
+              message: "Failed to delete the GitHub repository",
+            });
+          }
+        }
+      }
+
+      await CraftBench.findByIdAndDelete(craftId);
+      await User.updateOne(
+        {
+          _id: req.user?.dbData._id,
+        },
+        {
+          $pull: {
+            craftBenches: craftId,
+          },
+        }
+      );
+      res.status(200).json({
+        error: false,
+        message: "CraftBench and GitHub repository deleted successfully",
+      });
+    } catch (err: any) {
+      console.error("Error deleting CraftBench: ", err.message);
+      res.status(500).json({
+        error: true,
+        message: err.message || "Failed to delete the Craftbench",
+      });
+    }
+  })
+);
+
+craftBench.put(
+  "/unpublish",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const { craftId } = req.body;
+
+      if (!craftId || typeof craftId !== "string") {
+        throw new Error("Invalid or No craftId provided");
+      }
+      if (!req.user || !req.user.accessToken) {
+        res.status(401).json({ error: true, message: "Unauthorized" });
+        return;
+      }
+
+      const userName = req.user.userData.login;
+
+      const accessToken = req.user.accessToken;
+
+      const octokit = new Octokit({
+        auth: accessToken,
+      });
+
+      const craftData = await CraftBench.findOne({
+        _id: craftId,
+        userCreated: req.user?.dbData._id,
+      });
+
+      if (!craftData || !craftData.craftName) {
+        res.status(404).json({
+          error: true,
+          message:
+            "CraftBench not found or you do not have permission to delete it",
+        });
+        return;
+      }
+
+      const isPublished = craftData.status === "published";
+
+      if (isPublished) {
+        const doesRepoExists = await checkGithubRepoExists(
+          octokit,
+          craftData.craftName,
+          userName
+        );
+        if (!doesRepoExists) {
+          res.status(500).json({
+            error: true,
+            message: "GitHub repository does not exist",
+          });
+        } else {
+          const isRepoDeleted = await deleteGithubRepo(
+            octokit,
+            craftData.craftName,
+            userName
+          );
+          if (!isRepoDeleted) {
+            res.status(500).json({
+              error: true,
+              message: "Failed to delete the GitHub repository",
+            });
+          }
+        }
+      }
+
+      await CraftBench.findByIdAndUpdate(craftId, { status: "inProgress", repoLink:null });
+
+      res.status(200).json({
+        error: false,
+        message: "CraftBench unpublished successfully",
+      });
+    } catch (err: any) {
+      console.error("Error unpublishing CraftBench: ", err.message);
+      res.status(500).json({
+        error: true,
+        message: err.message || "Failed to unpublish the Craftbench",
+      });
     }
   })
 );
