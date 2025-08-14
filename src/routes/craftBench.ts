@@ -65,6 +65,42 @@ craftBench.get(
   })
 );
 
+craftBench.get(
+  "/:craftId",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      const craftId = req.params.craftId;
+      if (!craftId) {
+        res.status(400).json({ error: true, message: "Invalid craftId" });
+        return;
+      }
+
+      const craftBench = await CraftBench.findById(craftId).populate({
+        path: "folioSelected",
+        model: "Folio",
+        select: "folioName folioAvatar",
+      });
+      if (!craftBench) {
+        res.status(404).json({ error: true, message: "CraftBench not found" });
+        return;
+      }
+
+      res.status(200).json({
+        error: false,
+        message: "CraftBench retrieved successfully",
+        craftBench,
+      });
+    } catch (err: any) {
+      console.log("Error retrieving CraftBench", err);
+      res.status(500).json({
+        error: true,
+        message: "Server Error",
+        errorMessage: err && err.message ? err.message : String(err),
+      });
+    }
+  })
+);
+
 craftBench.post(
   "/new",
   asyncHandler(async (req: Request, res: Response) => {
@@ -123,6 +159,37 @@ craftBench.post(
         error: true,
         message: "Server Error",
         errorMessage: err && err.message ? err.message : String(err),
+      });
+    }
+  })
+);
+
+craftBench.put(
+  "/config",
+  asyncHandler(async (req: Request, res: Response) => {
+    try {
+      if (req.user === undefined) {
+        res.status(401).json({ error: true, message: "Unauthorized" });
+        return;
+      }
+      const { craftId, folioConfig } = req.body;
+      await CraftBench.findByIdAndUpdate(craftId, {
+        currentConfig: folioConfig,
+      });
+
+      await User.updateOne(
+        { _id: req.user.dbData._id },
+        { recentConfig: folioConfig }
+      );
+
+      res
+        .status(200)
+        .json({ error: false, message: "CraftBench updated successfully" });
+    } catch (err: any) {
+      res.status(500).json({
+        error: true,
+        errorMessage: "Server Error",
+        message: err && err.message ? err.message : String(err),
       });
     }
   })
@@ -298,6 +365,7 @@ craftBench.delete(
           },
         }
       );
+
       res.status(200).json({
         error: false,
         message: "CraftBench and GitHub repository deleted successfully",
@@ -376,7 +444,10 @@ craftBench.put(
         }
       }
 
-      await CraftBench.findByIdAndUpdate(craftId, { status: "inProgress", repoLink:null });
+      await CraftBench.findByIdAndUpdate(craftId, {
+        status: "inProgress",
+        repoLink: null,
+      });
 
       res.status(200).json({
         error: false,

@@ -2,7 +2,7 @@ export function classic(data:any) {
     // Notch
 
     let Notch = `
-<header class="sticky top-5 flex flex-row justify-between w-11/12 md:w-8/12 px-4 md:px-12 py-3  md:py-5 mx-auto mt-4  border-[#eeeeee21] border-2 backdrop-blur-lg bg-[#1f22232c] text-neutral-50  rounded-full
+<header class="sticky top-5 flex flex-row justify-between w-11/12 md:w-8/12 px-4 md:px-12 py-3 mx-auto mt-4  border-[#eeeeee21] border-2 backdrop-blur-lg bg-[#1f22232c] text-neutral-50  rounded-full
         mb-8">
     <h1 class="text-xl md:text-2xl ">${data.personalInformation.name}</h1>
 
@@ -43,7 +43,7 @@ export function classic(data:any) {
         let projectsStart = `
         <div class="sm:w-8/12 sm:px-12 px-4 mx-auto">
         <h1 class="py-6 text-4xl text-[#3FA2F6]">Projects</h1>
-        <div class="flex flex-col">
+        <div class="flex flex-col md:flex-row md:flex-wrap gap-2">
     `
         let projectsEnd = `
         </div>
@@ -52,7 +52,7 @@ export function classic(data:any) {
         let projectsDiv = "";
         projects.forEach((pro:any) => {
             projectsDiv += `
-        <div class="bg-[#1f2223] rounded-lg mb-12">
+        <div class="bg-[#1f2223] rounded-lg mb-12 md:w-[calc(50%-1rem)]">
     ${pro.image ? `<img src="${pro.image}" class="w-full rounded-t-lg" alt="${pro.title}">` : ""
                 }
             <div class="px-3 py-3">
@@ -61,7 +61,7 @@ export function classic(data:any) {
                 ${pro.description}
                 </p>
                 <p class="py-3 font-semibold">
-                ${pro.techStack}
+                ${pro.techStack.join(', ')}
                 </p>
                 <div class="flex gap-3">
                     <a class="border-[#242424] border-2 bg-[#27282c] rounded-lg p-1 text-white hover:shadow-[0_0_8px_rgba(0,0,0,0.1),0_0_5px_rgba(255,255,255,0.2)] transition-shadow duration-300" href="${pro.liveLink}" target="_blank" rel="noopener noreferrer"> Live Preview </a>
@@ -99,7 +99,7 @@ export function classic(data:any) {
                     ${w.description}
                 </p>
                 <p class="py-3 font-semibold">
-                    ${w.techStack}
+                    ${w.techStack.join(', ')}
                 </p>
             </div>
         </div>
@@ -133,7 +133,7 @@ export function classic(data:any) {
         languagesDiv = `
     <div class="px-3 py-3">
     <h1 class="text-xl font-semibold">Languages</h1>
-    <div class="flex gap-3 mt-2">
+    <div class="flex gap-3 mt-2 flex-wrap">
     `+ languages.map((lang:any) => {
             return `<p class="border-[#242424] border-2 bg-[#27282c] rounded-lg p-1 text-white hover:shadow-[0_0_8px_rgba(0,0,0,0.1),0_0_5px_rgba(255,255,255,0.2)] transition-shadow duration-300"> ${lang} </p>`
         }).join('') + ` 
@@ -147,7 +147,7 @@ export function classic(data:any) {
         frameworksDiv = `
     <div class="px-3 py-3">
     <h1 class="text-xl font-semibold">Frameworks</h1>
-    <div class="flex gap-3 mt-2">
+    <div class="flex gap-3 mt-2 flex-wrap">
     `+ frameworks.map((fw:any) => {
             return `<p class="border-[#242424] border-2 bg-[#27282c] rounded-lg p-1 text-white hover:shadow-[0_0_8px_rgba(0,0,0,0.1),0_0_5px_rgba(255,255,255,0.2)] transition-shadow duration-300"> ${fw} </p>`
         }).join('') + ` 
@@ -161,7 +161,7 @@ export function classic(data:any) {
         toolsDiv = `
     <div class="px-3 py-3">
     <h1 class="text-xl font-semibold">Tools</h1>
-    <div class="flex gap-3 mt-2">
+    <div class="flex gap-3 mt-2 flex-wrap">
     `+ tools.map((tool:any) => {
             return `<p class="border-[#242424] border-2 bg-[#27282c] rounded-lg p-1 text-white hover:shadow-[0_0_8px_rgba(0,0,0,0.1),0_0_5px_rgba(255,255,255,0.2)] transition-shadow duration-300"> ${tool} </p>`
         }).join('') + ` 
