@@ -12,6 +12,7 @@ import {
   publishFolioToGithub,
 } from "../utils/github.js";
 import { generateHTMLContent } from "../utils/craftBench.js";
+import { getFolioConfigJSON } from "../utils/gemini.js";
 
 const craftBench = Router();
 craftBench.use(json());
@@ -504,5 +505,27 @@ craftBench.put(
     }
   })
 );
+
+craftBench.post("/upload", asyncHandler(async (req: Request, res: Response) => {
+  const chunks: Buffer[] = [];
+
+  req.on("data", (chunk) => chunks.push(chunk));
+
+  req.on("end", async () => {
+    try {
+      const buffer = Buffer.concat(chunks);
+      const uint8Array = new Uint8Array(buffer);
+      const extractedText = await getFolioConfigJSON(uint8Array);
+      
+      res.json({
+        message: "PDF text extracted successfully",
+        folioConfig: extractedText
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+}));
+
 
 export default craftBench;
