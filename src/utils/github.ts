@@ -10,8 +10,10 @@ export const createGithubRepo = async (octokit: Octokit, repoName: string) => {
     },
   });
 
+  const branding = `Made with: [XenFolio](https://xenfolio.vercel.app)`
+
   // Step 2: Create the README.md file
-  const readmeContent = `# ${repoName}\n`;
+  const readmeContent = `# ${repoName}\n${branding}`;
   const contentBase64 = Buffer.from(readmeContent).toString("base64");
 
   // Create the README.md file in the repository
@@ -38,7 +40,8 @@ export const commitFolioToGithub = async (
   HTMLContent: string
 ) => {
   // Step 3: Create index.html in the repo
-  const indexHtmlContent = HTMLContent;
+  const branding = `<!-- Made with: XenFolio -> https://xenfolio.vercel.app -->`;
+  const indexHtmlContent = `${branding}\n${HTMLContent}\n${branding}`;
   const indexContentBase64 = Buffer.from(indexHtmlContent).toString("base64");
 
   // Create the index.html file in the repository

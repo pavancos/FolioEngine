@@ -202,7 +202,7 @@ export function classic(data:any) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio</title>
+    <title>${data.personalInformation.name || ""}'s Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 

@@ -1,8 +1,5 @@
 import { FolioConfig } from "../types/folioConfigTypes.js";
 
-
-
-
 export function verifyConfig(folioConfig: FolioConfig): boolean {
   const { personalInformation, skills, projects, workExperience } = folioConfig;
   if (

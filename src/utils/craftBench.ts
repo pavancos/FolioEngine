@@ -15,8 +15,8 @@ export function getMetaDataFromUsers(craftBenches: any[]): any[] {
   }));
 }
 
-export const generateHTMLContent = async (craftId: string) => {
-  const cb = await CraftBench.findOne({ _id: craftId }).populate({
+export const generateHTMLContent = async (craftId: string,userId:string) => {
+  const cb = await CraftBench.findOne({ _id: craftId,userCreated: userId }).populate({
     path: "folioSelected",
     select: "folioName",
     model: "Folio",
@@ -31,9 +31,10 @@ export const generateHTMLContent = async (craftId: string) => {
     throw new Error("Folio not found");
   }
   const template = templates[folio.folioName];
+  const branding = `<!-- Made with: XenFolio -> https://xenfolio.vercel.app -->`;
   const generatedHTML = template ? template(cb.currentConfig) : "";
   return {
-    html: generatedHTML,
+    html: `${branding}\n${generatedHTML}\n${branding}`,
     craftName: cb.craftName
   };
 };

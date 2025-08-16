@@ -116,6 +116,20 @@ craftBench.post(
         res.status(400).json({ error: true, message: "Invalid request body" });
         return;
       }
+
+      const findCraftBench = await CraftBench.findOne({
+        craftName: meta.craftName,
+        userCreated: req.user?.dbData._id,
+      });
+
+      if (findCraftBench) {
+        res.status(400).json({
+          error: true,
+          message: "CraftBench with this name already exists",
+        });
+        return;
+      }
+
       const newCraftBench = await CraftBench.create({
         craftName: meta.craftName,
         currentConfig: folioConfig,
@@ -204,8 +218,12 @@ craftBench.get(
         res.status(400).json({ error: true, message: "Invalid craftId" });
         return;
       }
+      if (req.user === undefined || !req.user.accessToken) {
+        res.status(401).json({ error: true, message: "Unauthorized" });
+        return;
+      }
 
-      const { html, craftName } = await generateHTMLContent(craftId);
+      const { html, craftName } = await generateHTMLContent(craftId,req.user?.dbData._id);
       if (!html) {
         res
           .status(404)
@@ -223,6 +241,29 @@ craftBench.get(
   })
 );
 
+craftBench.get("/check/:name",asyncHandler(async (req: Request, res: Response) => {
+  try {
+    if (req.user === undefined) {
+      res.status(401).json({ error: true, message: "Unauthorized" });
+      return;
+    }
+    const userId = req.user?.dbData._id;
+    const craftName = req.params.name.toLowerCase();
+    const craftExists = await CraftBench.exists({ userCreated: userId, craftName });
+    res.status(200).json({
+      error: false,
+      message: "Craft existence check completed",
+      exists: craftExists == null ? false : true,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      error: true,
+      message: "Server Error",
+      errorMessage: err && err.message ? err.message : String(err),
+    });
+  }
+}));
+
 craftBench.post(
   "/publish/:craftId",
   asyncHandler(async (req: Request, res: Response) => {
@@ -233,8 +274,9 @@ craftBench.post(
       }
       const accessToken = req.user.accessToken;
       const craftId = req.params.craftId as string;
+      const userId = req.user?.dbData._id;
 
-      const { html, craftName } = await generateHTMLContent(craftId);
+      const { html, craftName } = await generateHTMLContent(craftId,userId);
       if (!html) {
         res
           .status(404)
