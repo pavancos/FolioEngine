@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import User from './models/User.js';
 import CraftBench from './models/CraftBench.js';
 import Folio from './models/Folio.js';
@@ -28,12 +30,10 @@ app.use(
             '*',
             'http://localhost:3000',
             'http://localhost:5000',
-            'https://4cfw3zvk-8888.inc1.devtunnels.ms',
-            'https://tvpdpx33-8888.inc1.devtunnels.ms',
-            'https://tvpdpx33-5000.inc1.devtunnels.ms',
             'https://dth5w8dq-3000.inc1.devtunnels.ms',
-            'https://mdd7t8bl-8888.inc1.devtunnels.ms',
             'https://dth5w8dq-8888.inc1.devtunnels.ms',
+            'https://xpll12dz-8888.inc1.devtunnels.ms',
+            'https://xpll12dz-3000.inc1.devtunnels.ms',
             'https://xenfolio.vercel.app'
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
@@ -54,6 +54,11 @@ app.use(
     })
 );
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 app.get('/', (req, res) => {
     res.send('<h1>This is Folio Engine</h1>');
 });
@@ -72,6 +77,13 @@ app.use('/folio', folio);
 
 import dbTest from './tests/dbTest.js'
 app.use('/dbTest', dbTest);
+
+app.get('/:folioName', (req, res, next) => {
+    const file = path.join(__dirname, '..', 'public', `${req.params.folioName}.html`);
+    res.sendFile(file, (err) => {
+        if (err) next();
+    });
+});
 
 app.listen(3000, () => {
     console.log("Server Started at http://localhost:3000");

@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon -L dist/index.js",
-    "build": "npx tsc -p .",
-    "dev": "npm run build && npm run start",
-    "dev static": "npm run build && node dist/index.js"
+  "start": "nodemon -L dist/index.js",
+  "build": "npx tsc -p .",
+  "dev": "npm run build && npm run start",
+  "dev static": "npm run build && node dist/index.js",
+  "testFolio": "ts-node src/tests/testFolio.ts"
   },
   "keywords": [],
   "author": "",

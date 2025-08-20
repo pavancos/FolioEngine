@@ -107,9 +107,9 @@ craftBench.post(
   asyncHandler(async (req: Request, res: Response) => {
     try {
       let { folioConfig, meta, isRecentConfig } = req.body;
-      console.log("folioConfig", folioConfig);
+      // console.log("folioConfig", folioConfig);
       if (isRecentConfig && req.user?.dbData.recentConfig) {
-        console.log("Received folioConfig: ", req.user?.dbData.recentConfig);
+        // console.log("Received folioConfig: ", req.user?.dbData.recentConfig);
         folioConfig = req.user.dbData.recentConfig;
       }
       if (!folioConfig || !meta) {
@@ -308,13 +308,13 @@ craftBench.post(
 
       await CraftBench.findByIdAndUpdate(craftId, {
         status: "published",
-        repoLink: repoResponse.html_url,
+        repoLink: `https://github.com/${repoResponse.owner.login}/${repoName}`,
       });
 
       res.json({
         success: true,
         message: "Successfully Published your Folio",
-        folioUrl: publishResponse,
+        folioUrl: `https://${repoResponse.owner.login}.github.io/${repoName}/`,
       });
     } catch (error: any) {
       console.error(
@@ -369,31 +369,27 @@ craftBench.delete(
         return;
       }
 
-      const isPublished = craftData.status === "published";
-
-      if (isPublished) {
-        const doesRepoExists = await checkGithubRepoExists(
+      const doesRepoExists = await checkGithubRepoExists(
+        octokit,
+        craftData.craftName,
+        userName
+      );
+      if (!doesRepoExists) {
+        res.status(500).json({
+          error: true,
+          message: "GitHub repository does not exist",
+        });
+      } else {
+        const isRepoDeleted = await deleteGithubRepo(
           octokit,
           craftData.craftName,
           userName
         );
-        if (!doesRepoExists) {
+        if (!isRepoDeleted) {
           res.status(500).json({
             error: true,
-            message: "GitHub repository does not exist",
+            message: "Failed to delete the GitHub repository",
           });
-        } else {
-          const isRepoDeleted = await deleteGithubRepo(
-            octokit,
-            craftData.craftName,
-            userName
-          );
-          if (!isRepoDeleted) {
-            res.status(500).json({
-              error: true,
-              message: "Failed to delete the GitHub repository",
-            });
-          }
         }
       }
 

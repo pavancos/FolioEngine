@@ -90,13 +90,7 @@ export const publishFolioToGithub = async (
     status = pagesStatus.data.status;
     attempts++;
   }
-
-  if (status !== "built") {
-    throw new Error(`GitHub Pages did not finish building (status: ${status})`);
-  }
-
-  console.log(`GitHub Pages built successfully: ${enablePagesResponse.data.html_url}`);
-
+  
   return enablePagesResponse.data.html_url;
 };
 
@@ -132,7 +126,7 @@ export const deleteGithubRepo = async (octokit: Octokit, repoName: string, userN
         "X-GitHub-Api-Version": "2022-11-28",
       },
     });
-    console.log('response: ', response);
+    // console.log('response: ', response);
     return response.status === 204;
   } catch (err:any) {
     console.error(`Failed to delete repository ${repoName}:`, err);

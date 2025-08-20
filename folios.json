@@ -1,0 +1,22 @@
+[
+  {
+    "folioName": "classic",
+    "folioAvatar": "https://avatars.githubusercontent.com/u/121240801?v=4",
+    "creator": {
+      "developedBy": [
+        { "name": "Pavan", "githubUsername": "pavancos" },
+        { "name": "Vignesh", "githubUsername": "vigneshvaranasi" }
+      ]
+    }
+  },
+  {
+    "folioName": "minimal",
+    "folioAvatar": "https://avatars.githubusercontent.com/u/121240801?v=4",
+    "creator": {
+      "developedBy": [
+        { "name": "Vignesh", "githubUsername": "vigneshvaranasi" },
+        { "name": "Pavan", "githubUsername": "pavancos" }
+      ]
+    }
+  }
+]
