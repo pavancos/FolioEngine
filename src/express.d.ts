@@ -8,6 +8,8 @@ declare global {
         dbData: any;
         accessToken: string;
       };
+      on?: ()=> void;
+      destroy?: ()=> void;
     }
   }
 }

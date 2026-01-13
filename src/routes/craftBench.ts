@@ -13,6 +13,7 @@ import {
 } from "../utils/github.js";
 import { generateHTMLContent } from "../utils/craftBench.js";
 import { getFolioConfigJSON } from "../utils/gemini.js";
+import { validatePdfUpload } from "../middlewares/fileCheck.js";
 
 const craftBench = Router();
 craftBench.use(json());
@@ -502,7 +503,7 @@ craftBench.put(
   })
 );
 
-craftBench.post("/upload", asyncHandler(async (req: Request, res: Response) => {
+craftBench.post("/upload", validatePdfUpload, asyncHandler(async (req: Request, res: Response) => {
   const chunks: Buffer[] = [];
 
   req.on("data", (chunk) => chunks.push(chunk));
