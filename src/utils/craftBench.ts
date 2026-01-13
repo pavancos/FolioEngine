@@ -31,7 +31,7 @@ export const generateHTMLContent = async (craftId: string,userId:string) => {
     throw new Error("Folio not found");
   }
   const template = templates[folio.folioName];
-  const branding = `<!-- Made with: XenFolio -> https://xenfolio.vercel.app -->`;
+  const branding = `<!-- Made with: XenFolio -> https://folio.xendev.in -->`;
   const generatedHTML = template ? template(cb.currentConfig) : "";
   return {
     html: `${branding}\n${generatedHTML}\n${branding}`,

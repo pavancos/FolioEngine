@@ -34,7 +34,8 @@ app.use(
             'https://dth5w8dq-8888.inc1.devtunnels.ms',
             'https://xpll12dz-8888.inc1.devtunnels.ms',
             'https://xpll12dz-3000.inc1.devtunnels.ms',
-            'https://xenfolio.vercel.app'
+            'https://xenfolio.vercel.app',
+            'https://folio.xendev.in'
         ],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
         allowedHeaders: [
